@@ -334,7 +334,7 @@ pub fn remove_listener(
 /// Stops the current content playing associated to the specified game object ID.
 ///
 /// If no game object is specified, all sounds will be stopped.
-pub fn stop_all(game_object_id: Option<AkGameObjectID>) {
+pub fn stop_all(game_object_id: Option<u64>) {
     unsafe {
         StopAll(game_object_id.unwrap_or(AK_INVALID_GAME_OBJECT));
     }

@@ -180,7 +180,6 @@ fn main() -> io::Result<()> {
     #[cfg(not(debug_assertions))]
     build.define("NDEBUG", None);
 
-    #[cfg(wwrelease)]
     build.define("AK_OPTIMIZED", None);
 
     build.compile("rrise_utilities");

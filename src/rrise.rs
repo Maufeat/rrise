@@ -23,12 +23,12 @@ pub use error::*;
 use std::fmt::{Debug, Display, Formatter};
 pub use transform::*;
 
+pub use bindings::root::AkMIDIEvent as OtherAkMIDIEvent;
+
 /// Acoustic Texture ID
 pub use bindings::root::AkAcousticTextureID;
 /// Argument value ID
 pub use bindings::root::AkArgumentValueID;
-/// Audio Object ID
-pub use bindings::root::AkAudioObjectID;
 /// Auxilliary bus ID
 pub use bindings::root::AkAuxBusID;
 /// Run time bank ID
@@ -61,8 +61,6 @@ pub use bindings::root::AkMidiChannelNo;
 pub use bindings::root::AkModulatorID;
 /// Audio Output device ID
 pub use bindings::root::AkOutputDeviceID;
-/// Unique node (bus, voice) identifier for profiling.
-pub use bindings::root::AkPipelineID;
 /// Pitch value
 pub use bindings::root::AkPitchValue;
 /// Playing ID
@@ -75,8 +73,6 @@ pub use bindings::root::AkPluginParamID;
 pub use bindings::root::AkPortNumber;
 /// Priority
 pub use bindings::root::AkPriority;
-/// Unique (per emitter) identifier for an emitter-listener ray.
-pub use bindings::root::AkRayID;
 /// Real time parameter control ID
 pub use bindings::root::AkRtpcID;
 /// Real time parameter control value
@@ -138,7 +134,6 @@ pub use crate::bindings::root::AkMIDIEvent_tNoteAftertouch;
 pub use crate::bindings::root::AkMIDIEvent_tNoteOnOff;
 pub use crate::bindings::root::AkMIDIEvent_tPitchBend;
 pub use crate::bindings::root::AkMIDIEvent_tProgramChange;
-pub use crate::bindings::root::AkMIDIEvent_tWwiseCmd;
 
 #[doc(inline)]
 pub use bindings::root::AK_DEFAULT_BANK_IO_PRIORITY;
@@ -164,8 +159,6 @@ pub use bindings::root::AK_INVALID_DEVICE_ID;
 pub use bindings::root::AK_INVALID_FILE_ID;
 #[doc(inline)]
 pub use bindings::root::AK_INVALID_OUTPUT_DEVICE_ID;
-#[doc(inline)]
-pub use bindings::root::AK_INVALID_PIPELINE_ID;
 #[doc(inline)]
 pub use bindings::root::AK_INVALID_PLAYING_ID;
 #[doc(inline)]
@@ -315,128 +308,6 @@ pub enum AkMIDIEvent {
     PitchBend(AkMidiChannelNo, AkMIDIEvent_tPitchBend),
     /// Program change event
     ProgramChange(AkMidiChannelNo, AkMIDIEvent_tProgramChange),
-    /// Wwise command event
-    WwiseCmd(AkMidiChannelNo, AkMIDIEvent_tWwiseCmd),
-}
-
-impl AkMIDIEvent {
-    pub fn is_wwise_cmd(&self) -> bool {
-        matches!(self, Self::WwiseCmd(_, _))
-    }
-
-    pub fn is_wwise_cmd_play(&self) -> bool {
-        match self {
-            Self::WwiseCmd(_, wwise_cmd) => {
-                wwise_cmd.uCmd == bindings::root::AK_MIDI_WWISE_CMD_PLAY as u16
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_wwise_cmd_pause(&self) -> bool {
-        match self {
-            Self::WwiseCmd(_, wwise_cmd) => {
-                wwise_cmd.uCmd == bindings::root::AK_MIDI_WWISE_CMD_PAUSE as u16
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_wwise_cmd_stop(&self) -> bool {
-        match self {
-            Self::WwiseCmd(_, wwise_cmd) => {
-                wwise_cmd.uCmd == bindings::root::AK_MIDI_WWISE_CMD_STOP as u16
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_wwise_cmd_resume(&self) -> bool {
-        match self {
-            Self::WwiseCmd(_, wwise_cmd) => {
-                wwise_cmd.uCmd == bindings::root::AK_MIDI_WWISE_CMD_RESUME as u16
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_wwise_cmd_seek_ms(&self) -> bool {
-        match self {
-            Self::WwiseCmd(_, wwise_cmd) => {
-                wwise_cmd.uCmd == bindings::root::AK_MIDI_WWISE_CMD_SEEK_MS as u16
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_wwise_cmd_seek_samples(&self) -> bool {
-        match self {
-            Self::WwiseCmd(_, wwise_cmd) => {
-                wwise_cmd.uCmd == bindings::root::AK_MIDI_WWISE_CMD_SEEK_SAMPLES as u16
-            }
-            _ => false,
-        }
-    }
-
-    pub fn is_wwise_cmd_seek(&self) -> bool {
-        self.is_wwise_cmd_seek_ms() || self.is_wwise_cmd_seek_samples()
-    }
-
-    pub fn is_wwise_cmd_known(&self) -> bool {
-        self.is_wwise_cmd_play()
-            || self.is_wwise_cmd_pause()
-            || self.is_wwise_cmd_resume()
-            || self.is_wwise_cmd_stop()
-            || self.is_wwise_cmd_seek()
-    }
-
-    pub fn is_note_on(&self) -> bool {
-        match self {
-            Self::NoteOn(_, note_on_off) => note_on_off.byVelocity == 0,
-            _ => false,
-        }
-    }
-
-    pub fn is_note_off(&self) -> bool {
-        match self {
-            Self::NoteOff(_, note_on_off) => note_on_off.byVelocity == 0,
-            _ => false,
-        }
-    }
-}
-
-impl From<bindings::root::AkMIDIEvent> for AkMIDIEvent {
-    fn from(e: bindings::root::AkMIDIEvent) -> Self {
-        unsafe {
-            match e.byType as u32 {
-                bindings::root::AK_MIDI_EVENT_TYPE_NOTE_OFF => {
-                    AkMIDIEvent::NoteOn(e.byChan, e.__bindgen_anon_1.NoteOnOff)
-                }
-                bindings::root::AK_MIDI_EVENT_TYPE_NOTE_ON => {
-                    AkMIDIEvent::NoteOff(e.byChan, e.__bindgen_anon_1.NoteOnOff)
-                }
-                bindings::root::AK_MIDI_EVENT_TYPE_NOTE_AFTERTOUCH => {
-                    AkMIDIEvent::NoteAftertouch(e.byChan, e.__bindgen_anon_1.NoteAftertouch)
-                }
-                bindings::root::AK_MIDI_EVENT_TYPE_CONTROLLER => {
-                    AkMIDIEvent::Cc(e.byChan, e.__bindgen_anon_1.Cc)
-                }
-                bindings::root::AK_MIDI_EVENT_TYPE_PROGRAM_CHANGE => {
-                    AkMIDIEvent::ProgramChange(e.byChan, e.__bindgen_anon_1.ProgramChange)
-                }
-                bindings::root::AK_MIDI_EVENT_TYPE_CHANNEL_AFTERTOUCH => {
-                    AkMIDIEvent::ChanAftertouch(e.byChan, e.__bindgen_anon_1.ChanAftertouch)
-                }
-                bindings::root::AK_MIDI_EVENT_TYPE_PITCH_BEND => {
-                    AkMIDIEvent::PitchBend(e.byChan, e.__bindgen_anon_1.PitchBend)
-                }
-                bindings::root::AK_MIDI_EVENT_TYPE_WWISE_CMD => {
-                    AkMIDIEvent::WwiseCmd(e.byChan, e.__bindgen_anon_1.WwiseCmd)
-                }
-                _ => AkMIDIEvent::Gen(e.byChan, e.__bindgen_anon_1.Gen),
-            }
-        }
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -536,7 +407,7 @@ pub enum AkCallbackInfo {
         /// Unique ID of Event, passed to [PostEvent::new()](sound_engine::PostEvent::new)
         event_id: AkUniqueID,
         /// MIDI event triggered by event
-        midi_event: AkMIDIEvent,
+        midi_event: OtherAkMIDIEvent,
     },
 
     /// Callback information structure corresponding to [AkCallbackType::AK_MusicPlaylistSelect].

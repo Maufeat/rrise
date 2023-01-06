@@ -9,8 +9,14 @@
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
+impl std::fmt::Debug for root::AkMIDIEvent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AkMIDIEvent").finish()
+    }
+}
+
 /// Invalid game object (may also mean all game objects)
-pub const AK_INVALID_GAME_OBJECT: root::AkAudioObjectID = u64::MAX;
+pub const AK_INVALID_GAME_OBJECT: u64 = u64::MAX;
 
 /// Invalid audio object ID
-pub const AK_INVALID_AUDIO_OBJECT_ID: root::AkAudioObjectID = u64::MAX;
+pub const AK_INVALID_AUDIO_OBJECT_ID: u64 = u64::MAX;

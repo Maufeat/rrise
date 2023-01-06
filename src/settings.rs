@@ -143,8 +143,6 @@ pub struct AkInitSettings {
     pub bgm_callback_cookie: AtomicPtr<std::os::raw::c_void>,
     #[doc = "Floor plane axis for 3D game object viewing."]
     pub floor_plane: crate::bindings::root::AkFloorPlane,
-    #[doc = "The number of game units in a meter."]
-    pub game_units_to_meters: crate::bindings::root::AkReal32,
     #[doc = "The defined client task scheduler that AkSoundEngine will use to schedule internal tasks."]
     pub task_scheduler_desc: crate::bindings::root::AkTaskSchedulerDesc,
     #[doc = "The number of bytes read by the BankReader when new data needs to be loaded from disk during serialization. Increasing this trades memory usage for larger, but fewer, file-read events during bank loading."]
@@ -246,7 +244,6 @@ impl Default for AkInitSettings {
             bgm_callback: inner_settings.BGMCallback,
             bgm_callback_cookie: inner_settings.BGMCallbackCookie.into(),
             floor_plane: inner_settings.eFloorPlane,
-            game_units_to_meters: inner_settings.fGameUnitsToMeters,
             task_scheduler_desc: inner_settings.taskSchedulerDesc,
             bank_read_buffer_size: inner_settings.uBankReadBufferSize,
             debug_out_of_range_limit: inner_settings.fDebugOutOfRangeLimit,
@@ -385,7 +382,6 @@ impl AkInitSettings {
             BGMCallbackCookie: self.bgm_callback_cookie.load(Ordering::SeqCst),
             szPluginDLLPath: self.private_stuff.plugin_dll_path.as_mut_ptr(),
             eFloorPlane: self.floor_plane,
-            fGameUnitsToMeters: self.game_units_to_meters,
             taskSchedulerDesc: self.task_scheduler_desc,
             uBankReadBufferSize: self.bank_read_buffer_size,
             fDebugOutOfRangeLimit: self.debug_out_of_range_limit,
